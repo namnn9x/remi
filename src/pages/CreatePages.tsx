@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import PageEditorSidebar from '../components/PageEditorSidebar';
 import SinglePagePreview from '../components/SinglePagePreview';
 import PageNavigationBar from '../components/PageNavigationBar';
-import ShareModal from '../components/ShareModal';
 import type { Photo, PhotoPage } from '../types';
 
 const PROMPTS = [
@@ -17,9 +16,7 @@ export default function CreatePages() {
   const [pages, setPages] = useState<PhotoPage[]>([]);
   const [allPhotos, setAllPhotos] = useState<Photo[]>([]);
   const [memoryBook, setMemoryBook] = useState<{ name: string; type: string } | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [currentPageId, setCurrentPageId] = useState<string>('');
-  const [memoryBookId] = useState(() => Math.random().toString(36).substr(2, 9));
 
   useEffect(() => {
     const saved = localStorage.getItem('memoryBook');
@@ -211,7 +208,7 @@ export default function CreatePages() {
       <div className="bg-gray-100 h-screen overflow-hidden flex flex-col">
         {/* Header - Fixed */}
         <div className="bg-white shadow-sm border-b border-gray-200 z-30 flex-shrink-0" style={{ height: '72px' }}>
-          <div className="w-full h-full px-6 py-4 flex justify-between items-center">
+          <div className="w-full h-full px-6 py-4 flex items-center">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/create')}
@@ -223,15 +220,6 @@ export default function CreatePages() {
                 <h1 className="text-xl font-bold text-gray-900">{memoryBook.name}</h1>
               </div>
             </div>
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.493 9 12c0-.493-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-              </svg>
-              Chia sẻ
-            </button>
           </div>
         </div>
 
@@ -283,13 +271,6 @@ export default function CreatePages() {
           onRemovePage={handleRemovePage}
         />
       </div>
-
-      <ShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        memoryBookId={memoryBookId}
-        memoryBookName={memoryBook.name}
-      />
     </>
   );
 }

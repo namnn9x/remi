@@ -376,10 +376,10 @@ export default function PhotoPageEditor({
           placeholder="Viết cảm xúc về những khoảnh khắc này..."
           className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none resize-none bg-white text-gray-900 placeholder-gray-400 transition-all text-sm"
           rows={3}
-          maxLength={500}
+          maxLength={300}
         />
         <p className="text-xs text-gray-500 mt-1 text-right">
-          {note.length}/500
+          {note.length}/300
         </p>
       </div>
       </div>

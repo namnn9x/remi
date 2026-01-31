@@ -287,10 +287,10 @@ export default function PageEditorSidebar({
             placeholder="Viết cảm xúc về những khoảnh khắc này..."
             className="w-full flex-1 px-3 py-2.5 border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none resize-none bg-white text-gray-900 placeholder-gray-400 transition-all text-sm shadow-sm focus:shadow-md"
             style={{ borderRadius: '12px' }}
-            maxLength={500}
+            maxLength={300}
           />
           <p className="text-xs text-gray-500 mt-1 text-right">
-            {note.length}/500
+            {note.length}/300
           </p>
         </div>
       </div>

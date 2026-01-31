@@ -137,12 +137,12 @@ export default function SinglePagePreview({
         </div>
 
         {/* Text Side */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-white">
-          <div className="w-full max-w-md">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-white overflow-hidden">
+          <div className="w-full max-w-md overflow-hidden">
             {page.note ? (
-              <div className="relative">
+              <div className="relative overflow-hidden">
                 <div className={`absolute top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full ${isEven ? 'left-0' : 'right-0'}`}></div>
-                <p className={`text-gray-800 whitespace-pre-wrap leading-relaxed text-base md:text-lg font-serif ${isEven ? 'pl-6' : 'pr-6'}`}>
+                <p className={`text-gray-800 whitespace-pre-wrap leading-relaxed text-base md:text-lg font-serif overflow-wrap-anywhere break-words ${isEven ? 'pl-6' : 'pr-6'}`} style={{ wordBreak: 'break-word', overflow: 'hidden', maxWidth: '100%' }}>
                   {page.note}
                 </p>
               </div>
