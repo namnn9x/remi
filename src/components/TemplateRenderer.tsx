@@ -163,6 +163,30 @@ export default function TemplateRenderer({
         <div className="space-y-10 md:space-y-16">
           {pages.map((page, index) => {
             const isEven = index % 2 === 0;
+            const hasPhotos = page.photos.length > 0;
+            const hasNote = page.note && page.note.trim().length > 0;
+
+            // If no photos but has note, show text-only layout
+            if (!hasPhotos && hasNote) {
+              return (
+                <div
+                  key={page.id}
+                  className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 transform hover:shadow-2xl transition-shadow duration-300"
+                >
+                  <div className="flex items-center justify-center p-8 md:p-16 bg-white min-h-[400px]">
+                    <div className="w-full max-w-3xl">
+                      <div className="relative">
+                        <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full"></div>
+                        <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-lg md:text-xl font-serif pl-6">
+                          {page.note}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={page.id}
@@ -174,14 +198,16 @@ export default function TemplateRenderer({
                   } gap-0`}
                 >
                   {/* Image Side */}
-                  <div className="w-full md:w-1/2 p-6 bg-gradient-to-br from-gray-50 to-gray-100">
-                    {renderPhotoLayout(page)}
-                  </div>
+                  {hasPhotos && (
+                    <div className="w-full md:w-1/2 p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+                      {renderPhotoLayout(page)}
+                    </div>
+                  )}
 
                   {/* Text Side */}
-                  <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16 bg-white">
+                  <div className={`w-full ${hasPhotos ? 'md:w-1/2' : ''} flex items-center justify-center p-8 md:p-16 bg-white`}>
                     <div className="w-full max-w-md">
-                      {page.note ? (
+                      {hasNote ? (
                         <div className="relative">
                           <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full"></div>
                           <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-lg md:text-xl font-serif pl-6">
@@ -190,13 +216,15 @@ export default function TemplateRenderer({
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
+                          {!hasPhotos && (
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
                           <p className="text-gray-400 italic text-lg">
-                            Khoảnh khắc đáng nhớ...
+                            {hasPhotos ? 'Khoảnh khắc đáng nhớ...' : 'Viết cảm xúc của bạn...'}
                           </p>
                         </div>
                       )}

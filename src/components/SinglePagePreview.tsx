@@ -114,6 +114,26 @@ export default function SinglePagePreview({
   };
 
   const isEven = pageNumber % 2 === 0;
+  const hasPhotos = page.photos.length > 0;
+  const hasNote = page.note && page.note.trim().length > 0;
+
+  // If no photos but has note, show text-only layout
+  if (!hasPhotos && hasNote) {
+    return (
+      <div className="bg-white overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.12)]" style={{ maxWidth: '800px', width: '100%', borderRadius: '16px' }}>
+        <div className="flex items-center justify-center p-8 md:p-12 bg-white overflow-hidden min-h-[400px]">
+          <div className="w-full max-w-2xl overflow-hidden">
+            <div className="relative overflow-hidden">
+              <div className="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full left-0"></div>
+              <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-base md:text-lg font-serif overflow-wrap-anywhere break-words pl-6" style={{ wordBreak: 'break-word', overflow: 'hidden', maxWidth: '100%' }}>
+                {page.note}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.12)]" style={{ maxWidth: '800px', width: '100%', borderRadius: '16px' }}>
@@ -123,23 +143,16 @@ export default function SinglePagePreview({
         } gap-0`}
       >
         {/* Image Side */}
-        <div className="w-full md:w-1/2 p-6 bg-gradient-to-br from-gray-50 to-gray-100">
-          {page.photos.length > 0 ? (
-            renderPhotoLayout(page)
-          ) : (
-            <div className="w-full h-full min-h-[400px] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">📷</div>
-                <p className="text-gray-400 text-sm">Chưa có ảnh</p>
-              </div>
-            </div>
-          )}
-        </div>
+        {hasPhotos && (
+          <div className="w-full md:w-1/2 p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+            {renderPhotoLayout(page)}
+          </div>
+        )}
 
         {/* Text Side */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12 bg-white overflow-hidden">
+        <div className={`w-full ${hasPhotos ? 'md:w-1/2' : ''} flex items-center justify-center p-8 md:p-12 bg-white overflow-hidden`}>
           <div className="w-full max-w-md overflow-hidden">
-            {page.note ? (
+            {hasNote ? (
               <div className="relative overflow-hidden">
                 <div className={`absolute top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full ${isEven ? 'left-0' : 'right-0'}`}></div>
                 <p className={`text-gray-800 whitespace-pre-wrap leading-relaxed text-base md:text-lg font-serif overflow-wrap-anywhere break-words ${isEven ? 'pl-6' : 'pr-6'}`} style={{ wordBreak: 'break-word', overflow: 'hidden', maxWidth: '100%' }}>
@@ -148,13 +161,15 @@ export default function SinglePagePreview({
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
+                {!hasPhotos && (
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
                 <p className="text-gray-400 italic text-base">
-                  Khoảnh khắc đáng nhớ...
+                  {hasPhotos ? 'Khoảnh khắc đáng nhớ...' : 'Viết cảm xúc của bạn...'}
                 </p>
               </div>
             )}
