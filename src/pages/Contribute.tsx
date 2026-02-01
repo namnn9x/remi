@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { api, ApiError } from '../api/client';
 import type { Photo } from '../types';
 
 const PROMPTS = [
@@ -12,25 +13,46 @@ export default function Contribute() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [memoryBook, setMemoryBook] = useState<{
+    id: string;
     name: string;
     type: string;
   } | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Load memory book info from localStorage
-    const saved = localStorage.getItem('memoryBook');
-    if (saved) {
-      const data = JSON.parse(saved);
-      setMemoryBook({
-        name: data.name,
-        type: data.type,
-      });
-    }
-  }, []);
+    const loadMemoryBook = async () => {
+      if (!id) {
+        navigate('/');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await api.getMemoryBookByContributeId(id);
+        setMemoryBook({
+          id: data.id,
+          name: data.name,
+          type: data.type,
+        });
+      } catch (err) {
+        const apiError = err as ApiError;
+        setError(apiError.error?.message || 'Không thể tải thông tin nhật ký');
+        console.error('Error loading memory book:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMemoryBook();
+  }, [id, navigate]);
 
   const getRandomPrompt = () => PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
 
@@ -38,7 +60,7 @@ export default function Contribute() {
     if (!files) return;
 
     const newPhotos: Photo[] = [];
-    Array.from(files).slice(0, 10).forEach((file) => {
+    Array.from(files).slice(0, 10 - photos.length).forEach((file) => {
       if (file.type.startsWith('image/')) {
         const photoId = Math.random().toString(36).substr(2, 9);
         const preview = URL.createObjectURL(file);
@@ -84,31 +106,41 @@ export default function Contribute() {
     );
   };
 
-  const handleSubmit = () => {
-    if (photos.length === 0) {
+  const handleSubmit = async () => {
+    if (photos.length === 0 || !memoryBook) {
       alert('Vui lòng thêm ít nhất một ảnh');
       return;
     }
 
-    // Save contributions to localStorage
-    const contributions = photos.map((p) => ({
-      id: p.id,
-      preview: p.preview,
-      note: p.note,
-      prompt: p.prompt,
-      contributedAt: new Date().toISOString(),
-    }));
+    setSubmitting(true);
+    setError(null);
 
-    const contributionsKey = `memoryBook_${id}_contributions`;
-    const existingContributions = localStorage.getItem(contributionsKey);
-    const allContributions = existingContributions
-      ? [...JSON.parse(existingContributions), ...contributions]
-      : contributions;
+    try {
+      const files = photos.map((p) => p.file!).filter((f) => f !== undefined);
+      const notes = photos.map((p) => p.note);
+      const prompts = photos.map((p) => p.prompt);
 
-    localStorage.setItem(contributionsKey, JSON.stringify(allContributions));
-
-    setSubmitted(true);
+      await api.submitContributions(memoryBook.id, files, notes, prompts);
+      setSubmitted(true);
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(apiError.error?.message || 'Không thể gửi đóng góp');
+      console.error('Error submitting contributions:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600">Đang tải...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -136,6 +168,26 @@ export default function Contribute() {
     );
   }
 
+  if (!memoryBook) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4">
+        <div className="max-w-md w-full text-center">
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+              {error}
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+          >
+            Về trang chủ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 py-12">
       <div className="max-w-2xl mx-auto">
@@ -149,13 +201,18 @@ export default function Contribute() {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             Đóng góp ảnh
           </h1>
-          {memoryBook && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-6 py-3 inline-block shadow-md">
-              <p className="text-sm text-gray-600 mb-1">Cho nhật ký:</p>
-              <p className="text-lg font-semibold text-gray-900">{memoryBook.name}</p>
-            </div>
-          )}
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl px-6 py-3 inline-block shadow-md">
+            <p className="text-sm text-gray-600 mb-1">Cho nhật ký:</p>
+            <p className="text-lg font-semibold text-gray-900">{memoryBook.name}</p>
+          </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Upload Area */}
         <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 mb-6">
@@ -247,10 +304,10 @@ export default function Contribute() {
         <div className="text-center">
           <button
             onClick={handleSubmit}
-            disabled={photos.length === 0}
+            disabled={photos.length === 0 || submitting}
             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            Gửi ảnh đóng góp
+            {submitting ? 'Đang gửi...' : 'Gửi ảnh đóng góp'}
           </button>
         </div>
       </div>

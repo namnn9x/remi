@@ -3,15 +3,18 @@ import { useState } from 'react';
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  memoryBookId: string;
+  memoryBookId: string; // This is actually shareId
   memoryBookName: string;
+  contributeId?: string; // Optional contributeId
 }
 
-export default function ShareModal({ isOpen, onClose, memoryBookId, memoryBookName }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, memoryBookId, memoryBookName, contributeId }: ShareModalProps) {
   const [copied, setCopied] = useState<'view' | 'contribute' | 'text' | null>(null);
 
   const viewLink = `${window.location.origin}/view/${memoryBookId}`;
-  const contributeLink = `${window.location.origin}/contribute/${memoryBookId}`;
+  const contributeLink = contributeId 
+    ? `${window.location.origin}/contribute/${contributeId}`
+    : `${window.location.origin}/contribute/${memoryBookId}`;
   const shareText = `Xem nhật ký "${memoryBookName}" của chúng mình nhé! 📔💕\n\n${viewLink}`;
 
   const copyToClipboard = async (text: string, type: 'view' | 'contribute' | 'text') => {

@@ -1,11 +1,49 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-3xl mx-auto text-center">
+    <div className="min-h-screen flex flex-col px-4 py-12 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header with Auth */}
+      <div className="max-w-3xl mx-auto w-full mb-8 flex justify-end">
+        {isAuthenticated ? (
+          <div className="flex items-center gap-4">
+            <span className="text-gray-700">Xin chào, <strong>{user?.name}</strong></span>
+            <button
+              onClick={() => navigate('/gallery')}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+            >
+              Gallery
+            </button>
+            <button
+              onClick={logout}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+            >
+              Đăng nhập
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              Đăng ký
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-3xl mx-auto text-center flex-1 flex items-center justify-center">
         {/* Hero Section */}
         <div className="mb-12">
           <div className="inline-block mb-6">
@@ -28,16 +66,32 @@ export default function Landing() {
         </div>
 
         {/* CTA Button */}
-        <button
-          onClick={() => navigate('/create')}
-          className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 mb-8 overflow-hidden"
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            <span>Bắt đầu tạo nhật ký</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </button>
+        {isAuthenticated ? (
+          <button
+            onClick={() => navigate('/create')}
+            className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 mb-8 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <span>Bắt đầu tạo nhật ký</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </button>
+        ) : (
+          <div className="mb-8">
+            <p className="text-gray-600 mb-4">Vui lòng đăng nhập để tạo nhật ký kỷ niệm</p>
+            <button
+              onClick={() => navigate('/login')}
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <span>Đăng nhập</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+          </div>
+        )}
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
